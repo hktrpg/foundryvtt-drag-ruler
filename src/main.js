@@ -1,9 +1,10 @@
 "use strict"
 
-import {currentSpeedProvider, getRangesFromSpeedProvider, getUnreachableColorFromSpeedProvider, initApi, registerModule, registerSystem} from "./api.js"
+import {getRangesFromSpeedProvider, getUnreachableColorFromSpeedProvider, initApi, registerModule, registerSystem} from "./api.js"
 import {getHexSizeSupportTokenGridCenter} from "./compatibility.js"
 import {measure, moveTokens, onMouseMove} from "./foundry_imports.js"
 import {registerSettings, settingsKey} from "./settings.js"
+import {SpeedProvider} from "./speed_provider.js"
 
 Hooks.once("init", () => {
 	registerSettings()
@@ -16,12 +17,12 @@ Hooks.once("init", () => {
 	window.dragRuler = {
 		getColorForDistance,
 		registerModule,
-		registerSystem
+		registerSystem,
 	}
 })
 
 Hooks.once("ready", () => {
-	Hooks.callAll("dragRuler.ready")
+	Hooks.callAll("dragRuler.ready", SpeedProvider)
 })
 
 Hooks.on("canvasReady", () => {
