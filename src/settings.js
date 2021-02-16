@@ -72,12 +72,17 @@ class SpeedProviderSettings extends FormApplication {
 
 	getData(options={}) {
 		const data = {}
+		const selectedProvider = game.settings.get(settingsKey, "speedProvider")
 		// Insert all speed providers into the template data
 		data.providers = Object.values(availableSpeedProviders).map(provider => {
 			provider.hasSettings = provider instanceof SpeedProvider
 			if (provider.hasSettings)
 				provider.settings = enumerateProviderSettings(provider)
-			const [type, id] = provider.id.split(".", 1)
+			let dotPosition = provider.id.indexOf(".")
+			if (dotPosition === -1)
+				dotPosition = provider.id.length
+			const type = provider.id.substring(0, dotPosition)
+			const id = provider.id.substring(dotPosition + 1)
 			if (type === "native") {
 				provider.selectTitle = game.i18n.localize("drag-ruler.settings.speedProviderSettings.speedProvider.choices.native")
 			}
@@ -91,6 +96,7 @@ class SpeedProviderSettings extends FormApplication {
 				}
 				provider.selectTitle = game.i18n.format(`drag-ruler.settings.speedProviderSettings.speedProvider.choices.${type}`, {name})
 			}
+			provider.isSelected = provider.id === selectedProvider
 			return provider
 		})
 		data.providerSelection = {
@@ -102,12 +108,41 @@ class SpeedProviderSettings extends FormApplication {
 				choices[provider.id] = provider.selectTitle
 				return choices
 			}, {}),
-			value: game.settings.get(settingsKey, "speedProvider"),
+			value: selectedProvider,
 			isCheckbox: false,
 			isSelect: true,
 			isRange: false,
 		}
 		return data
+	}
+
+	async _updateObject(event, formData) {
+		for (let [key, value] of Object.entries(formData)) {
+			// Check if this is color, convert the value to an integer
+			const splitKey = key.split(".", 3)
+			if (splitKey[0] !== "native")
+				splitKey.shift()
+			if (splitKey.length >= 2 && splitKey[1] == "color") {
+				value = parseInt(value.substring(1), 16)
+			}
+
+			// Get the key for the current setting
+			let setting
+			if (key === "speedProvider")
+				setting = "speedProvider"
+			else
+				setting = `speedProviders.${key}`
+
+			// Get the old setting value
+			const oldValue = game.settings.get(settingsKey, setting)
+
+			// Only update the setting if it has been changed (this leaves the default in place if it hasn't been touched)
+			if (value !== oldValue)
+				game.settings.set(settingsKey, setting, value)
+		}
+
+		// Activate the configured speed provider
+		updateSpeedProvider()
 	}
 }
 
@@ -117,10 +152,12 @@ function toDomHex(value) {
 }
 
 function enumerateProviderSettings(provider) {
+	// TODO Handle plugins that raise an exception
 	const colorSettings = []
 	const unreachableColor = {id: "unreachable", name: "drag-ruler.settings.speedProviderSettings.color.unreachable.name"}
 	for (const color of provider.colors.concat([unreachableColor])) {
-		const colorName = game.i18n.localize(color.name)
+		// Localize the name, if avaliable. If no name is available use the id as name
+		const colorName = color.name ? game.i18n.localize(color.name) : color.id
 		let hint
 		if (color === unreachableColor)
 			hint = game.i18n.localize("drag-ruler.settings.speedProviderSettings.color.unreachable.hint")

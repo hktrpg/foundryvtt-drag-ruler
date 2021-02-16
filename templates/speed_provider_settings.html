@@ -38,7 +38,7 @@
 			{{/with}}
 			<h2 class="module-header">{{localize "drag-ruler.settings.speedProviderSettings.headers.speedProviderSettings"}}</h2>
 			{{#each this.providers}}
-				<div id="drag-ruler.provider.{{this.id}}">
+				<div id="drag-ruler.provider.{{this.id}}" {{#unless this.isSelected}}style="display:none"{{/unless}}>
 					{{#if this.hasSettings}}
 						{{#each settings}}
 							{{> settingPartial}}
