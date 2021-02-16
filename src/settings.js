@@ -144,6 +144,23 @@ class SpeedProviderSettings extends FormApplication {
 		// Activate the configured speed provider
 		updateSpeedProvider()
 	}
+
+	activateListeners(html) {
+		super.activateListeners(html)
+		html.find("select[name=speedProvider]").change(this.onSpeedProviderChange.bind(this))
+	}
+
+	onSpeedProviderChange(event) {
+		// Hide all module settings
+		document.querySelectorAll(".drag-ruler-provider-settings").forEach(element => element.style.display = "none")
+		// Show the settings block for the currently selected module
+		document.getElementById(`drag-ruler.provider.${event.currentTarget.value}`).style.display = ""
+
+		// Recalculate window height
+		this.element[0].style.height = null
+		this.position.height = undefined
+		this.render(false)
+	}
 }
 
 function toDomHex(value) {
