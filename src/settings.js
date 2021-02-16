@@ -1,6 +1,5 @@
 import {availableSpeedProviders, getDefaultSpeedProvider, updateSpeedProvider} from "./api.js";
 import {SpeedProvider} from "./speed_provider.js"
-import {getDefaultDashMultiplier, getDefaultSpeedAttribute} from "./systems.js"
 
 export const settingsKey = "drag-ruler";
 
@@ -40,24 +39,6 @@ export function registerSettings() {
 		type: SpeedProviderSettings,
 		restricted: false,
 	})
-
-	game.settings.register(settingsKey, "speedAttribute", {
-		name: "drag-ruler.settings.speedAttribute.name",
-		hint: "drag-ruler.settings.speedAttribute.hint",
-		scope: "world",
-		config: true,
-		type: String,
-		default: getDefaultSpeedAttribute(),
-	})
-
-	game.settings.register(settingsKey, "dashMultiplier", {
-		name: "drag-ruler.settings.dashMultiplier.name",
-		hint: "drag-ruler.settings.dashMultiplier.hint",
-		scope: "world",
-		config: true,
-		type: Number,
-		default: getDefaultDashMultiplier(),
-	})
 }
 
 class SpeedProviderSettings extends FormApplication {
@@ -74,10 +55,12 @@ class SpeedProviderSettings extends FormApplication {
 		const data = {}
 		const selectedProvider = game.settings.get(settingsKey, "speedProvider")
 		// Insert all speed providers into the template data
-		data.providers = Object.values(availableSpeedProviders).map(provider => {
-			provider.hasSettings = provider instanceof SpeedProvider
+		data.providers = Object.values(availableSpeedProviders).map(speedProvider => {
+			const provider = {}
+			provider.id = speedProvider.id
+			provider.hasSettings = speedProvider instanceof SpeedProvider
 			if (provider.hasSettings)
-				provider.settings = enumerateProviderSettings(provider)
+				provider.settings = enumerateProviderSettings(speedProvider)
 			let dotPosition = provider.id.indexOf(".")
 			if (dotPosition === -1)
 				dotPosition = provider.id.length
@@ -168,9 +151,10 @@ function toDomHex(value) {
 }
 
 function enumerateProviderSettings(provider) {
-	// TODO Handle plugins that raise an exception
 	const colorSettings = []
 	const unreachableColor = {id: "unreachable", name: "drag-ruler.settings.speedProviderSettings.color.unreachable.name"}
+
+	// Resolve settings for the colors
 	for (const color of provider.colors.concat([unreachableColor])) {
 		// Localize the name, if avaliable. If no name is available use the id as name
 		const colorName = color.name ? game.i18n.localize(color.name) : color.id
@@ -192,6 +176,27 @@ function enumerateProviderSettings(provider) {
 		})
 	}
 
-	// TODO Add regular settings
-	return colorSettings
+	// Prepare regular settings
+	const settings = []
+	for (const setting of provider.settings) {
+		try {
+			const s = duplicate(setting)
+			s.id = `${provider.id}.setting.${s.id}`
+			s.name = game.i18n.localize(s.name)
+			s.hint = game.i18n.localize(s.hint)
+			s.value = provider.getSetting(setting.id)
+			s.type = setting.type instanceof Function ? setting.type.name : "String"
+			s.isCheckbox = setting.type === Boolean
+			s.isSelect = s.choices !== undefined
+			s.isRange = (setting.type === Number) && s.range
+			s.isColor = false
+			settings.push(s)
+		}
+		catch (e) {
+			console.warn(`Drag Ruler | The following error occured while rendering setting "${setting.id}" of module/system "${this.id}. It won't be displayed.`)
+			console.error(e)
+		}
+	}
+
+	return settings.concat(colorSettings)
 }

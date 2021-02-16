@@ -1,4 +1,5 @@
 import {settingsKey} from "./settings.js"
+import {getDefaultDashMultiplier, getDefaultSpeedAttribute} from "./systems.js"
 
 /**
  * Base class for all speed providers.
@@ -34,6 +35,19 @@ export class SpeedProvider {
 	}
 
 	/**
+	 * Returns an array of configuration options for this module. The settings will be shown in the Speed Provider Settings of Drag Ruler.
+	 * Each configuration option is an object that has the same attributes as a native foundry setting passed to `game.settings.register`,
+	 * except for these exceptions:
+	 * - id: A string that identifies the setting. Must be unique for each setting returned. This id will be used to fetch the setting.
+	 * - config: This property is not supported by Drag Ruler module settings. Use foundries native settings instead if you need settings that don't show up in the configuration dialog.
+	 *
+	 * Implementing this method is optional and only needs to be done if you want to provide custom provider settings
+	 */
+	get settings() {
+		return []
+	}
+
+	/**
 	 * Returns the default color for ranges that a token cannot reach.
 	 *
 	 * Implementing this method is optional and only needs to be done if you want to provide a custom default for that color.
@@ -43,8 +57,26 @@ export class SpeedProvider {
 	}
 
 	/**
+	 * Returns the value that is currently set for the setting registered with the provided settingId.
+	 *
+	 * This function shouldn't be overridden by speed provider implementations. It can be called to fetch speed provider specific settings.
+	 */
+	getSetting(settingId) {
+		try {
+			return game.settings.get(settingsKey, `speedProviders.${this.id}.setting.${settingId}`)
+		}
+		catch (e) {
+			if (this.settings.some(setting => setting.id === settingId)) {
+				throw e
+			}
+			throw new Error(`Drag Ruler | "${settingId}" is not a registered setting for "${this.id}". If you're the module/system developer, please add it to the return values of your Speed Providers "get settings()" function.`)
+		}
+	}
+
+	/**
 	 * Constructs a new instance of he speed provider
-	 * This function shouldn't be overridden by speed provider implementations
+	 *
+	 * This function should neither be called or overridden by speed provider implementations
 	 */
 	constructor(id) {
 		this.id = id
@@ -61,8 +93,7 @@ export class GenericSpeedProvider extends SpeedProvider {
 	}
 
 	getRanges(token) {
-		// TODO Move this setting into a provider setting
-		const speedAttribute = game.settings.get(settingsKey, "speedAttribute")
+		const speedAttribute = this.getSetting("speedAttribute")
 		if (!speedAttribute)
 			return []
 		const tokenSpeed = getProperty(token, speedAttribute)
@@ -70,9 +101,32 @@ export class GenericSpeedProvider extends SpeedProvider {
 			console.warn(`Drag Ruler (Generic Speed Provider) | The configured token speed attribute "${speedAttribute}" didn't return a speed value. To use colors based on drag distance set the setting to the correct value (or clear the box to disable this feature).`)
 			return []
 		}
-		const dashMultiplier = game.settings.get(settingsKey, "dashMultiplier")
+		const dashMultiplier = this.getSetting("dashMultiplier")
 		if (!dashMultiplier)
 			return [{range: tokenSpeed, color: playercolor}]
 		return [{range: tokenSpeed, color: "walk"}, {range: tokenSpeed * dashMultiplier, color: "dash"}]
+	}
+
+	get settings() {
+		return [
+			{
+				id: "speedAttribute",
+				name: "drag-ruler.settings.speedAttribute.name",
+				hint: "drag-ruler.settings.speedAttribute.hint",
+				scope: "world",
+				config: true,
+				type: String,
+				default: getDefaultSpeedAttribute(),
+			},
+			{
+				id: "dashMultiplier",
+				name: "drag-ruler.settings.dashMultiplier.name",
+				hint: "drag-ruler.settings.dashMultiplier.hint",
+				scope: "world",
+				config: true,
+				type: Number,
+				default: getDefaultDashMultiplier(),
+			}
+		]
 	}
 }

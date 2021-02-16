@@ -28,7 +28,10 @@ function setupProvider(speedProvider) {
 				default: color.default,
 			})
 		}
-		// TODO Register normal settings
+		for (const setting of speedProvider.settings) {
+			setting.config = false
+			game.settings.register(settingsKey, `speedProviders.${speedProvider.id}.setting.${setting.id}`, setting)
+		}
 	}
 
 	availableSpeedProviders[speedProvider.id] = speedProvider
