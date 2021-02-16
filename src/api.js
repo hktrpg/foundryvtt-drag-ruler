@@ -66,20 +66,31 @@ export function initApi() {
 }
 
 export function getRangesFromSpeedProvider(token) {
-	if (currentSpeedProvider instanceof Function)
-		return currentSpeedProvider(token, 0x00FF00)
-	const ranges = currentSpeedProvider.getRanges(token)
-	for (const range of ranges) {
-		range.color = game.settings.get(settingsKey, `speedProviders.${currentSpeedProvider.id}.color.${range.color}`)
+	try {
+		if (currentSpeedProvider instanceof Function)
+			return currentSpeedProvider(token, 0x00FF00)
+		const ranges = currentSpeedProvider.getRanges(token)
+		for (const range of ranges) {
+			range.color = game.settings.get(settingsKey, `speedProviders.${currentSpeedProvider.id}.color.${range.color}`)
+		}
+		return ranges
 	}
-	return ranges
+	catch (e) {
+		console.error(e)
+		return []
+	}
 }
 
 export function getUnreachableColorFromSpeedProvider() {
 	if (currentSpeedProvider instanceof Function)
 		return 0xFF0000
-	return game.settings.get(settingsKey, `speedProviders.${currentSpeedProvider.id}.color.unreachable`)
-
+	try {
+		return game.settings.get(settingsKey, `speedProviders.${currentSpeedProvider.id}.color.unreachable`)
+	}
+	catch (e) {
+		console.error(e)
+		return 0xFF0000
+	}
 }
 
 export function registerModule(moduleId, speedProvider) {
