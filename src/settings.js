@@ -159,7 +159,6 @@ class SpeedProviderSettings extends FormApplication {
 		// Recalculate window height
 		this.element[0].style.height = null
 		this.position.height = undefined
-		this.render(false)
 	}
 }
 
