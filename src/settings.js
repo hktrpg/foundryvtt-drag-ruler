@@ -75,13 +75,8 @@ class SpeedProviderSettings extends FormApplication {
 		// Insert all speed providers into the template data
 		data.providers = Object.values(availableSpeedProviders).map(provider => {
 			provider.hasSettings = provider instanceof SpeedProvider
-			if (provider.hasSettings) {
+			if (provider.hasSettings)
 				provider.settings = enumerateProviderSettings(provider)
-			}
-			else {
-				// TODO Move this logic into the template
-				provider.settings = []
-			}
 			const [type, id] = provider.id.split(".", 1)
 			if (type === "native") {
 				provider.selectTitle = game.i18n.localize("drag-ruler.settings.speedProviderSettings.speedProvider.choices.native")
@@ -116,6 +111,11 @@ class SpeedProviderSettings extends FormApplication {
 	}
 }
 
+function toDomHex(value) {
+	const hex = value.toString(16)
+	return "#" + "0".repeat(Math.max(0, 6 - hex.length)) + hex
+}
+
 function enumerateProviderSettings(provider) {
 	const colorSettings = []
 	const unreachableColor = {id: "unreachable", name: "drag-ruler.settings.speedProviderSettings.color.unreachable.name"}
@@ -131,10 +131,11 @@ function enumerateProviderSettings(provider) {
 			name: game.i18n.format("drag-ruler.settings.speedProviderSettings.color.name", {colorName}),
 			hint: hint,
 			type: Number,
-			value: game.settings.get(settingsKey, `speedProviders.${provider.id}.color.${color.id}`),
+			value: toDomHex(game.settings.get(settingsKey, `speedProviders.${provider.id}.color.${color.id}`)),
 			isCheckbox: false,
 			isSelect: false,
 			isRange: false,
+			isColor: true,
 		})
 	}
 
