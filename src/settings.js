@@ -113,6 +113,10 @@ class SpeedProviderSettings extends FormApplication {
 				value = parseInt(value.substring(1), 16)
 			}
 
+			// Don't change settings for speed providers that aren't currently active
+			if (key !== "speedProvider" && !key.startsWith(formData.speedProvider))
+				continue
+
 			// Get the key for the current setting
 			let setting
 			if (key === "speedProvider")
