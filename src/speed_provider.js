@@ -19,7 +19,7 @@ export class SpeedProvider {
 	 * Implementing this method is required for all speed providers
 	 */
 	get colors() {
-		// TODO Report that this function must be implemented
+		throw new Error("A SpeedProvider must implement the colors function")
 	}
 
 	/**
@@ -31,7 +31,7 @@ export class SpeedProvider {
 	 * Implementing this method is required for all speed providers
 	 */
 	getRanges(token) {
-		// TODO Report that this function must be implemented
+		throw new Error("A SpeedProvider must implement the getRanges function")
 	}
 
 	/**
