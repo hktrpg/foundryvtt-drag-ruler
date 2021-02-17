@@ -28,6 +28,10 @@
 					"speedProvider": "Speed Provider",
 					"speedProviderSettings": "Speed Provider specific settings"
 				},
+				"activeProvider": {
+					"name": "Currently active Speed Provider",
+					"hint": "The settings show below depend on the active speed provider. If the GM selects a different speed provider the available settings may change."
+				},
 				"color": {
 					"name": "Color for {colorName}",
 					"hint": "The color that will be used to color square that are within {colorName} range",

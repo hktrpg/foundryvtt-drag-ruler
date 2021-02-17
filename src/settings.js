@@ -53,7 +53,9 @@ class SpeedProviderSettings extends FormApplication {
 
 	getData(options={}) {
 		const data = {}
+		data.isGM = game.user.isGM
 		const selectedProvider = game.settings.get(settingsKey, "speedProvider")
+
 		// Insert all speed providers into the template data
 		data.providers = Object.values(availableSpeedProviders).map(speedProvider => {
 			const provider = {}
@@ -82,6 +84,8 @@ class SpeedProviderSettings extends FormApplication {
 			provider.isSelected = provider.id === selectedProvider
 			return provider
 		})
+		data.selectedProviderName = data.providers.find(provider => provider.isSelected).selectTitle
+
 		data.providerSelection = {
 			id: "speedProvider",
 			name: game.i18n.localize("drag-ruler.settings.speedProviderSettings.speedProvider.name"),
@@ -180,6 +184,8 @@ function enumerateProviderSettings(provider) {
 	const settings = []
 	for (const setting of provider.settings) {
 		try {
+			if (setting.scope === "world" && !game.user.isGM)
+				continue
 			const s = duplicate(setting)
 			s.id = `${provider.id}.setting.${s.id}`
 			s.name = game.i18n.localize(s.name)
