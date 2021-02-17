@@ -111,8 +111,8 @@ export class GenericSpeedProvider extends SpeedProvider {
 		return [
 			{
 				id: "speedAttribute",
-				name: "drag-ruler.settings.speedAttribute.name",
-				hint: "drag-ruler.settings.speedAttribute.hint",
+				name: "drag-ruler.genericSpeedProvider.settings.speedAttribute.name",
+				hint: "drag-ruler.genericSpeedProvider.settings.speedAttribute.hint",
 				scope: "world",
 				config: true,
 				type: String,
@@ -120,8 +120,8 @@ export class GenericSpeedProvider extends SpeedProvider {
 			},
 			{
 				id: "dashMultiplier",
-				name: "drag-ruler.settings.dashMultiplier.name",
-				hint: "drag-ruler.settings.dashMultiplier.hint",
+				name: "drag-ruler.genericSpeedProvider.settings.dashMultiplier.name",
+				hint: "drag-ruler.genericSpeedProvider.settings.dashMultiplier.hint",
 				scope: "world",
 				config: true,
 				type: Number,
