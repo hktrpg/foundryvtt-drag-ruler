@@ -48,6 +48,8 @@
 						{{#each settings}}
 							{{> settingPartial}}
 						{{/each}}
+					{{else}}
+						<p>{{localize "drag-ruler.settings.speedProviderSettings.noSettings"}}</p>
 					{{/if}}
 				</div>
 			{{/each}}

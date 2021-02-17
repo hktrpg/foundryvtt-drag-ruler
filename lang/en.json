@@ -32,6 +32,7 @@
 					"name": "Currently active Speed Provider",
 					"hint": "The settings show below depend on the active speed provider. If the GM selects a different speed provider the available settings may change."
 				},
+				"noSettings": "This speed provider doesn't offer any configuration options.",
 				"color": {
 					"name": "Color for {colorName}",
 					"hint": "The color that will be used to color square that are within {colorName} range",
