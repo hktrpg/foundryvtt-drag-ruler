@@ -6,6 +6,7 @@ import {measure, moveTokens, onMouseMove} from "./foundry_imports.js"
 import {performMigrations} from "./migration.js"
 import {registerSettings, settingsKey} from "./settings.js"
 import {SpeedProvider} from "./speed_provider.js"
+import { getSnapPointForToken } from "./util.js"
 
 Hooks.once("init", () => {
 	registerSettings()
@@ -215,11 +216,11 @@ function onRulerMoveToken(event) {
 }
 
 function addWaypoint(point, snap=true) {
+	console.warn(point)
 	if (snap)
-		point = canvas.grid.getCenter(point.x, point.y);
-	else
-		point = [point.x, point.y]
-	this.waypoints.push(new PIXI.Point(point[0], point[1]));
+		point = getSnapPointForToken(point.x, point.y, this.draggedToken)
+	console.warn(point)
+	this.waypoints.push(new PIXI.Point(point.x, point.y));
 	this.labels.addChild(new PreciseText("", CONFIG.canvasTextStyle));
 }
 
