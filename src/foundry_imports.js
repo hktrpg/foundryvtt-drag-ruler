@@ -1,6 +1,6 @@
 import {highlightMeasurementTerrainRuler} from "./compatibility.js";
 import {getColorForDistance} from "./main.js"
-import {zip} from "./util.js"
+import {getSnapPointForToken, zip} from "./util.js"
 
 // This is a modified version of Ruler.moveToken from foundry 0.7.9
 export async function moveTokens(draggedToken, selectedTokens) {
@@ -104,7 +104,8 @@ export function measure(destination, {gridSpaces=true, snap=false} = {}) {
 		return []
 
 	if (snap)
-		destination = new PIXI.Point(...canvas.grid.getCenter(destination.x, destination.y));
+		destination = getSnapPointForToken(destination.x, destination.y, this.draggedToken)
+
 	const waypoints = this.waypoints.concat([destination]);
 	const centeredWaypoints = waypoints.map(w => new PIXI.Point(...canvas.grid.getCenter(w.x, w.y)))
 	const r = this.ruler;
