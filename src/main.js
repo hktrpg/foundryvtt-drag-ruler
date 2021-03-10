@@ -216,10 +216,8 @@ function onRulerMoveToken(event) {
 }
 
 function addWaypoint(point, snap=true) {
-	console.warn(point)
 	if (snap)
 		point = getSnapPointForToken(point.x, point.y, this.draggedToken)
-	console.warn(point)
 	this.waypoints.push(new PIXI.Point(point.x, point.y));
 	this.labels.addChild(new PreciseText("", CONFIG.canvasTextStyle));
 }
