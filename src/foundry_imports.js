@@ -1,6 +1,6 @@
 import {highlightMeasurementTerrainRuler} from "./compatibility.js";
 import {getColorForDistance} from "./main.js"
-import {getSnapPointForToken, zip} from "./util.js"
+import {getSnapPointForToken, getTokenShape, zip} from "./util.js"
 
 // This is a modified version of Ruler.moveToken from foundry 0.7.9
 export async function moveTokens(draggedToken, selectedTokens) {
@@ -158,6 +158,7 @@ export function measure(destination, {gridSpaces=true, snap=false} = {}) {
 		rulerColor = getColorForDistance.call(this, totalDistance)
 	else
 		rulerColor = this.color
+	const shape = getTokenShape(this.draggedToken)
 	for (const [s, cs] of zip(segments.reverse(), centeredSegments.reverse())) {
 		const { ray, label, text, last } = s;
 
@@ -176,9 +177,9 @@ export function measure(destination, {gridSpaces=true, snap=false} = {}) {
 
 		// Highlight grid positions
 		if (terrainRulerAvailable)
-			highlightMeasurementTerrainRuler.call(this, cs.ray, s.startDistance)
+			highlightMeasurementTerrainRuler.call(this, cs.ray, s.startDistance, shape)
 		else
-			highlightMeasurementNative.call(this, ray, s.startDistance);
+			highlightMeasurementNative.call(this, ray, s.startDistance, shape);
 	}
 
 	// Draw endpoints

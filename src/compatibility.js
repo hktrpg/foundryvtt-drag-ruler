@@ -1,15 +1,14 @@
-import {getPixelsFromGridPosition} from "./foundry_fixes.js"
 import {getColorForDistance} from "./main.js"
+import {highlightTokenShape} from "./util.js"
 
 export function getHexSizeSupportTokenGridCenter(token) {
 	const tokenCenterOffset = CONFIG.hexSizeSupport.getCenterOffset(token)
 	return {x: token.x + tokenCenterOffset.x, y: token.y + tokenCenterOffset.y}
 }
 
-export function highlightMeasurementTerrainRuler(ray, startDistance) {
-	for (const space of ray.terrainRulerVisitedSpaces) {
-		const [x, y] = getPixelsFromGridPosition(space.x, space.y);
+export function highlightMeasurementTerrainRuler(ray, startDistance, tokenShape=[{x: 0, y: 0}]) {
+	for (const space of ray.terrainRulerVisitedSpaces.reverse()) {
 		const color = getColorForDistance.call(this, startDistance, space.distance)
-		canvas.grid.highlightPosition(this.name, {x, y, color: color})
+		highlightTokenShape.call(this, space, tokenShape, color)
 	}
 }
