@@ -59,17 +59,18 @@ export function getTokenShape(token) {
 	}
 	else {
 		if (game.modules.get("hex-size-support")?.active && CONFIG.hexSizeSupport.getAltSnappingFlag(token)) {
+			let shape;
 			switch (token.data.flags["hex-size-support"].borderSize) {
 				case 2:
-					if (CONFIG.hexSizeSupport.getAltOrientationFlag(token)) {
-						return [{x: 0, y: 0}, {x: -1, y: 0}, {x: -1, y: -1}];
-					}
-					else {
-						return [{x: 0, y: 0}, {x: 0, y: -1}, {x: -1, y: -1}];
-					}
+					shape = [{x: 0, y: 0}, {x: 0, y: -1}, {x: -1, y: -1}];
+					break;
 				default:
 					return [{x: 0, y: 0}]
 			}
+			if (CONFIG.hexSizeSupport.getAltOrientationFlag(token)) {
+				shape.forEach(space => space.y *= -1);
+			}
+			return shape;
 		}
 		else {
 			return [{x: 0, y: 0}];
@@ -100,25 +101,11 @@ export function applyTokenSizeOffset(waypoints, token) {
 	const tokenSize = getTokenSize(token);
 	const waypointOffset = {x: 0, y: 0};
 	if (canvas.grid.isHex) {
-		const shortDiagonal = Math.min(canvas.grid.w, canvas.grid.h);
-		const edgeLength = Math.max(canvas.grid.w, canvas.grid.h) / 2;
 		const isAltOrientation = CONFIG.hexSizeSupport.getAltOrientationFlag(token);
-		if (tokenSize.w % 2 === 0 && isAltOrientation) {
-			if (canvas.grid.w === shortDiagonal)
-				waypointOffset.x = shortDiagonal / 2;
-			else
-				waypointOffset.x = edgeLength / 2;
-		}
 		if (tokenSize.h % 2 === 0) {
-			if (isAltOrientation) {
-				if (canvas.grid.h === shortDiagonal)
-					waypointOffset.y = shortDiagonal / 2;
-				else
-					waypointOffset.y = edgeLength / 2;
-			}
-			else {
-				waypointOffset.y = canvas.grid.h / 2;
-			}
+			waypointOffset.y = canvas.grid.h / 2;
+			if (isAltOrientation)
+				waypointOffset.y *= -1;
 		}
 	}
 	else {
