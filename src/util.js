@@ -98,17 +98,23 @@ export function applyTokenSizeOffset(waypoints, token) {
 	if (canvas.grid.isHex) {
 		const shortDiagonal = Math.min(canvas.grid.w, canvas.grid.h);
 		const edgeLength = Math.max(canvas.grid.w, canvas.grid.h) / 2;
-		if (tokenSize.w % 2 === 0) {
+		const isAltOrientation = CONFIG.hexSizeSupport.getAltOrientationFlag(token);
+		if (tokenSize.w % 2 === 0 && isAltOrientation) {
 			if (canvas.grid.w === shortDiagonal)
 				waypointOffset.x = shortDiagonal / 2;
 			else
 				waypointOffset.x = edgeLength / 2;
 		}
 		if (tokenSize.h % 2 === 0) {
-			if (canvas.grid.h === shortDiagonal)
-				waypointOffset.y = shortDiagonal / 2;
-			else
-				waypointOffset.y = edgeLength / 2;
+			if (isAltOrientation) {
+				if (canvas.grid.h === shortDiagonal)
+					waypointOffset.y = shortDiagonal / 2;
+				else
+					waypointOffset.y = edgeLength / 2;
+			}
+			else {
+				waypointOffset.y = canvas.grid.h / 2;
+			}
 		}
 	}
 	else {
