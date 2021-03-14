@@ -163,18 +163,18 @@ export function measure(destination, {gridSpaces=true, snap=false} = {}) {
 		rulerColor = this.color
 	const shape = getTokenShape(this.draggedToken)
 	for (const [s, cs] of zip(segments.reverse(), centeredSegments.reverse())) {
-		const { ray, label, text, last } = s;
+		const { label, text, last } = cs;
 
 		// Draw line segment
-		r.lineStyle(6, 0x000000, 0.5).moveTo(ray.A.x, ray.A.y).lineTo(ray.B.x, ray.B.y)
-			.lineStyle(4, rulerColor, 0.25).moveTo(ray.A.x, ray.A.y).lineTo(ray.B.x, ray.B.y);
+		r.lineStyle(6, 0x000000, 0.5).moveTo(s.ray.A.x, s.ray.A.y).lineTo(s.ray.B.x, s.ray.B.y)
+			.lineStyle(4, rulerColor, 0.25).moveTo(s.ray.A.x, s.ray.A.y).lineTo(s.ray.B.x, s.ray.B.y);
 
 		// Draw the distance label just after the endpoint of the segment
 		if (label) {
 			label.text = text;
 			label.alpha = last ? 1.0 : 0.5;
 			label.visible = true;
-			let labelPosition = ray.project((ray.distance + 50) / ray.distance);
+			let labelPosition = cs.ray.project((cs.ray.distance + 50) / cs.ray.distance);
 			label.position.set(labelPosition.x, labelPosition.y);
 		}
 
