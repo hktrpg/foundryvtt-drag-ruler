@@ -29,8 +29,12 @@ export function highlightTokenShape(position, shape, color) {
 		const gridY = position.y + space.y;
 		if (canvas.grid.isHex) {
 			// TODO Hex cols
-			// TODO Hex even
-			if (space.y % 2 !== 0 && position.y % 2 !== 0) {
+			let shiftedRow;
+			if (canvas.grid.grid.options.even)
+				shiftedRow = 1
+			else
+				shiftedRow = 0
+			if (space.y % 2 !== 0 && position.y % 2 !== shiftedRow) {
 				gridX += 1;
 			}
 		}
