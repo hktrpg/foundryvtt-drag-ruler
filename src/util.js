@@ -25,7 +25,16 @@ export function getSnapPointForToken(x, y, token) {
 
 export function highlightTokenShape(position, shape, color) {
 	for (const space of shape) {
-		const [x, y] = getPixelsFromGridPosition(position.x + space.x, position.y + space.y);
+		let gridX = position.x + space.x;
+		const gridY = position.y + space.y;
+		if (canvas.grid.isHex) {
+			// TODO Hex cols
+			// TODO Hex even
+			if (space.y % 2 !== 0 && position.y % 2 !== 0) {
+				gridX += 1;
+			}
+		}
+		const [x, y] = getPixelsFromGridPosition(gridX, gridY);
 		canvas.grid.highlightPosition(this.name, {x, y, color})
 	}
 }
@@ -45,7 +54,71 @@ export function getTokenShape(token) {
 		return shape
 	}
 	else {
-		console.warn("Token shape for HexSizeSupport isn't implemented yet")
-		return [{x: 0, y: 0}]
+		if (game.modules.get("hex-size-support")?.active && CONFIG.hexSizeSupport.getAltSnappingFlag(token)) {
+			switch (token.data.flags["hex-size-support"].borderSize) {
+				case 2:
+					if (CONFIG.hexSizeSupport.getAltOrientationFlag(token)) {
+						return [{x: 0, y: 0}, {x: -1, y: 0}, {x: -1, y: -1}];
+					}
+					else {
+						return [{x: 0, y: 0}, {x: 0, y: -1}, {x: -1, y: -1}];
+					}
+				default:
+					return [{x: 0, y: 0}]
+			}
+		}
+		else {
+			return [{x: 0, y: 0}];
+		}
 	}
+}
+
+export function getTokenSize(token) {
+	let w, h;
+	const hexSizeSupportBorderSize = token.data.flags["hex-size-support"]?.borderSize;
+	if (hexSizeSupportBorderSize > 0) {
+		w = h = hexSizeSupportBorderSize
+	}
+	else {
+		w = token.data.width
+		h = token.data.height
+	}
+	return {w, h};
+}
+
+// Tokens that have a size divisible by two (2x2, 4x4, 2x1) have their ruler at the edge of a cell.
+// This function applies an offset to to the waypoints that will move the ruler from the edge to the center of the cell
+export function applyTokenSizeOffset(waypoints, token) {
+	if (canvas.grid.type === CONST.GRID_TYPES.GRIDLESS) {
+		return waypoints
+	}
+
+	const tokenSize = getTokenSize(token);
+	const waypointOffset = {x: 0, y: 0};
+	if (canvas.grid.isHex) {
+		const shortDiagonal = Math.min(canvas.grid.w, canvas.grid.h);
+		const edgeLength = Math.max(canvas.grid.w, canvas.grid.h) / 2;
+		if (tokenSize.w % 2 === 0) {
+			if (canvas.grid.w === shortDiagonal)
+				waypointOffset.x = shortDiagonal / 2;
+			else
+				waypointOffset.x = edgeLength / 2;
+		}
+		if (tokenSize.h % 2 === 0) {
+			if (canvas.grid.h === shortDiagonal)
+				waypointOffset.y = shortDiagonal / 2;
+			else
+				waypointOffset.y = edgeLength / 2;
+		}
+	}
+	else {
+		if (tokenSize.w % 2 === 0) {
+			waypointOffset.x = canvas.grid.w / 2;
+		}
+		if (tokenSize.h % 2 === 0) {
+			waypointOffset.y = canvas.grid.h / 2;
+		}
+	}
+
+	return waypoints.map(w => new PIXI.Point(w.x + waypointOffset.x, w.y + waypointOffset.y))
 }
