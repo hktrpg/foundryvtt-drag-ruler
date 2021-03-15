@@ -9,7 +9,7 @@ export function* zip(it1, it2) {
 export function getSnapPointForToken(x, y, token) {
 	if (canvas.grid.isHex && game.modules.get("hex-size-support")?.active && CONFIG.hexSizeSupport.getAltSnappingFlag(token)) {
 		if (token.getFlag("hex-size-support", "borderSize") % 2 === 0) {
-			const snapPoint = CONFIG.hexSizeSupport.findVertexSnapPoint(x, y, token, canvas.grid)
+			const snapPoint = CONFIG.hexSizeSupport.findVertexSnapPoint(x, y, token, canvas.grid.grid)
 			return new PIXI.Point(snapPoint.x, snapPoint.y)
 		}
 		else {
@@ -26,16 +26,22 @@ export function getSnapPointForToken(x, y, token) {
 export function highlightTokenShape(position, shape, color) {
 	for (const space of shape) {
 		let gridX = position.x + space.x;
-		const gridY = position.y + space.y;
+		let gridY = position.y + space.y;
 		if (canvas.grid.isHex) {
-			// TODO Hex cols
 			let shiftedRow;
 			if (canvas.grid.grid.options.even)
 				shiftedRow = 1
 			else
 				shiftedRow = 0
-			if (space.y % 2 !== 0 && position.y % 2 !== shiftedRow) {
-				gridX += 1;
+			if (canvas.grid.grid.options.columns) {
+				if (space.x % 2 !== 0 && position.x % 2 !== shiftedRow) {
+					gridY += 1;
+				}
+			}
+			else {
+				if (space.y % 2 !== 0 && position.y % 2 !== shiftedRow) {
+					gridX += 1;
+				}
 			}
 		}
 		const [x, y] = getPixelsFromGridPosition(gridX, gridY);
@@ -58,6 +64,7 @@ export function getTokenShape(token) {
 		return shape
 	}
 	else {
+		// Hex grids
 		if (game.modules.get("hex-size-support")?.active && CONFIG.hexSizeSupport.getAltSnappingFlag(token)) {
 			let shape;
 			switch (token.data.flags["hex-size-support"].borderSize) {
@@ -67,9 +74,10 @@ export function getTokenShape(token) {
 				default:
 					return [{x: 0, y: 0}]
 			}
-			if (CONFIG.hexSizeSupport.getAltOrientationFlag(token)) {
+			if (Boolean(CONFIG.hexSizeSupport.getAltOrientationFlag(token)) !== canvas.grid.grid.options.columns)
 				shape.forEach(space => space.y *= -1);
-			}
+			if (canvas.grid.grid.options.columns)
+				shape = shape.map(space => {return {x: space.y, y: space.x}});
 			return shape;
 		}
 		else {
@@ -102,10 +110,19 @@ export function applyTokenSizeOffset(waypoints, token) {
 	const waypointOffset = {x: 0, y: 0};
 	if (canvas.grid.isHex) {
 		const isAltOrientation = CONFIG.hexSizeSupport.getAltOrientationFlag(token);
-		if (tokenSize.h % 2 === 0) {
-			waypointOffset.y = canvas.grid.h / 2;
-			if (isAltOrientation)
-				waypointOffset.y *= -1;
+		if (canvas.grid.grid.options.columns) {
+			if (tokenSize.w % 2 === 0) {
+				waypointOffset.x = canvas.grid.w / 2;
+				if (!isAltOrientation)
+					waypointOffset.x *= -1;
+			}
+		}
+		else {
+			if (tokenSize.h % 2 === 0) {
+				waypointOffset.y = canvas.grid.h / 2;
+				if (isAltOrientation)
+					waypointOffset.y *= -1;
+			}
 		}
 	}
 	else {
