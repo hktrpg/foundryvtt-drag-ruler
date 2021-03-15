@@ -2,7 +2,7 @@
 	"name": "drag-ruler-alpha",
 	"title": "Drag Ruler (Alpha Branch)",
 	"description": "When dragging a token displays a ruler showing how far you've moved that token.",
-	"version": "1.4.0-alpha1",
+	"version": "1.4.0-alpha2",
 	"minimumCoreVersion" : "0.7.9",
 	"compatibleCoreVersion" : "0.7.9",
 	"authors": [
