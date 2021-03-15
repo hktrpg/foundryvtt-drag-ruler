@@ -195,7 +195,6 @@ export function measure(destination, {gridSpaces=true, snap=false} = {}) {
 }
 
 export function highlightMeasurementNative(ray, startDistance, tokenShape=[{x: 0, y: 0}]) {
-	let log = ""
 	const spacer = canvas.scene.data.gridType === CONST.GRID_TYPES.SQUARE ? 1.41 : 1;
 	const nMax = Math.max(Math.floor(ray.distance / (spacer * Math.min(canvas.grid.w, canvas.grid.h))), 1);
 	const tMax = Array.fromRange(nMax+1).map(t => t / nMax);
@@ -207,8 +206,6 @@ export function highlightMeasurementNative(ray, startDistance, tokenShape=[{x: 0
 	for ( let [i, t] of tMax.reverse().entries() ) {
 		let {x, y} = ray.project(t);
 
-		log += `\nPos ${x} ${y}`;
-
 		// Get grid position
 		let [x0, y0] = (i === 0) ? [null, null] : prior;
 		let [x1, y1] = canvas.grid.grid.getGridPositionFromPixels(x, y);
@@ -219,9 +216,7 @@ export function highlightMeasurementNative(ray, startDistance, tokenShape=[{x: 0
 		const subDistance = canvas.grid.measureDistances([{ray: new Ray(ray.A, {x: xg, y: yg})}], {gridSpaces: true})[0]
 		const color = dragRuler.getColorForDistance.call(this, startDistance, subDistance)
 		const snapPoint = getSnapPointForToken(...canvas.grid.getTopLeft(x, y), this.draggedToken);
-		log += `\nSnap ${snapPoint.x} ${snapPoint.y}`;
 		const [snapX, snapY] = getGridPositionFromPixels(snapPoint.x + 1, snapPoint.y + 1);
-		log += `\n${snapX} ${snapY}`;
 
 		prior = [x1, y1];
 
@@ -229,19 +224,15 @@ export function highlightMeasurementNative(ray, startDistance, tokenShape=[{x: 0
 		if (i > 0 && !canvas.grid.isNeighbor(x0, y0, x1, y1)) {
 			let th = tMax[i - 1] - (0.5 / nMax);
 			let {x, y} = ray.project(th);
-			log += `\n  Pos ${x} ${y}`
 			let [x1h, y1h] = canvas.grid.grid.getGridPositionFromPixels(x, y);
 			let [xgh, ygh] = canvas.grid.grid.getPixelsFromGridPosition(x1h, y1h);
 			const subDistance = canvas.grid.measureDistances([{ray: new Ray(ray.A, {x: xgh, y: ygh})}], {gridSpaces: true})[0]
 			const color = dragRuler.getColorForDistance.call(this, startDistance, subDistance)
 			const snapPoint = getSnapPointForToken(...canvas.grid.getTopLeft(x, y), this.draggedToken);
-			log += `\n  Snap ${snapPoint.x} ${snapPoint.y}`;
 			const [snapX, snapY] = getGridPositionFromPixels(snapPoint.x + 1, snapPoint.y + 1);
-			log += `\n  ${snapX} ${snapY}`;
 			highlightTokenShape.call(this, {x: snapX, y: snapY}, tokenShape, color);
 		}
 
 		highlightTokenShape.call(this, {x: snapX, y: snapY}, tokenShape, color);
 	}
-	console.warn(log)
 }
