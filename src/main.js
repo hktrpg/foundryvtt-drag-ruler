@@ -9,6 +9,14 @@ import {SpeedProvider} from "./speed_provider.js"
 import { getSnapPointForToken } from "./util.js"
 
 Hooks.once("init", () => {
+	{
+		const alphaWarning = "You are using the alpha branch of Drag Ruler. DO NOT USE IT IN PRODUCTION ENVIRONMENTS. This branch is used for pre-release testing. As a result this branch will only be updated sporadically and may be siginificantly newer (or even older) than the main Drag Ruler release branch. In addition this branch is likely to be likely to contain more bugs.";
+		console.warn(alphaWarning)
+		ui.notifications.warn(alphaWarning)
+		if (game.modules.get("drag-ruler")?.active) {
+			ui.notification.error("You have both the release version and the alpha version of Drag Ruler enabled. Doing so prevents the module from working properly. Please disable either the release or the alpha version of Drag Ruler.", {permanent: true});
+		}
+	}
 	registerSettings()
 	initApi()
 	hookTokenDragHandlers()
