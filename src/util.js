@@ -67,7 +67,6 @@ export function getTokenShape(token) {
 		// Hex grids
 		if (game.modules.get("hex-size-support")?.active && CONFIG.hexSizeSupport.getAltSnappingFlag(token)) {
 			const borderSize = token.data.flags["hex-size-support"].borderSize;
-			console.warn(borderSize)
 			let shape = [{x: 0, y: 0}];
 			if (borderSize >= 2)
 				shape = shape.concat([{x: 0, y: -1}, {x: -1, y: -1}]);
