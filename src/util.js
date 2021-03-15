@@ -66,14 +66,16 @@ export function getTokenShape(token) {
 	else {
 		// Hex grids
 		if (game.modules.get("hex-size-support")?.active && CONFIG.hexSizeSupport.getAltSnappingFlag(token)) {
-			let shape;
-			switch (token.data.flags["hex-size-support"].borderSize) {
-				case 2:
-					shape = [{x: 0, y: 0}, {x: 0, y: -1}, {x: -1, y: -1}];
-					break;
-				default:
-					return [{x: 0, y: 0}]
-			}
+			const borderSize = token.data.flags["hex-size-support"].borderSize;
+			console.warn(borderSize)
+			let shape = [{x: 0, y: 0}];
+			if (borderSize >= 2)
+				shape = shape.concat([{x: 0, y: -1}, {x: -1, y: -1}]);
+			if (borderSize >= 3)
+				shape = shape.concat([{x: 0, y: 1}, {x: -1, y: 1}, {x: -1, y: 0}, {x: 1, y: 0}]);
+			if (borderSize >= 4)
+				shape = shape.concat([{x: -2, y: -1}, {x: 1, y: -1}, {x: -1, y: -2}, {x: 0, y: -2}, {x: 1, y: -2}])
+
 			if (Boolean(CONFIG.hexSizeSupport.getAltOrientationFlag(token)) !== canvas.grid.grid.options.columns)
 				shape.forEach(space => space.y *= -1);
 			if (canvas.grid.grid.options.columns)
